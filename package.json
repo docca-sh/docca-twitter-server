@@ -12,7 +12,7 @@
     ],
     "scripts": {
         "start": "tsx ./src/index.ts",
-        "build": "tsc --noemit"
+        "check-types": "tsc --noemit"
     },
     "keywords": [
         "mcp",
