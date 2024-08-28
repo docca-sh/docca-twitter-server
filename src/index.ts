@@ -13,7 +13,7 @@ import { ResponseFormatter } from './formatter.js';
 import { TwitterClient } from './twitter-api.js';
 
 process.on('SIGINT', async () => {
-    console.info('Shutting down server...');
+    console.error('Shutting down server...');
     await mcp.close();
     process.exit(0);
 });
@@ -95,16 +95,18 @@ const twitterClients: Record<string, TwitterClient> = {};
 app.get("/sse", async (req, res) => {
     const transport = new SSEServerTransport("/messages", res);
     sessions[transport.sessionId] = transport;
+    const { oauth_token, oauth_token_secret } = req.headers;
     twitterClients[transport.sessionId] = new TwitterClient({
-        accessToken: env.TWITTER_ACCESS_TOKEN,
-        accessTokenSecret: env.TWITTER_ACCESS_TOKEN_SECRET,
-        apiKey: env.TWITTER_API_KEY,
-        apiSecretKey: env.TWITTER_API_SECRET_KEY
+        appKey: env.TWITTER_API_KEY,
+        appSecret: env.TWITTER_API_SECRET,
+        accessToken: oauth_token?.toString(),
+        accessSecret: oauth_token_secret?.toString()
     });
     await mcp.connect(transport);
 });
 
 app.post("/messages", async (req, res) => {
+    console.log(req.query);
     const query = req.query as { sessionId: string };
     const transport = sessions[query.sessionId];
     if (!transport) {
@@ -115,5 +117,4 @@ app.post("/messages", async (req, res) => {
 });
 
 app.listen(env.PORT);
-console.debug('123')
 console.log(`Twitter MCP Server running on port ${env.PORT}`);

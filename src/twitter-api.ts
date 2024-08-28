@@ -1,17 +1,12 @@
-import { TwitterApi } from 'twitter-api-v2';
+import { TwitterApi, TwitterApiTokens } from 'twitter-api-v2';
 import { PostedTweet, Tweet, TwitterError, TwitterUser } from './types.js';
 
 export class TwitterClient {
     private client: TwitterApi;
     private rateLimitMap = new Map<string, number>();
 
-    constructor(config: { accessToken: string, accessTokenSecret: string, apiKey: string, apiSecretKey: string }) {
-        this.client = new TwitterApi({
-            appKey: config.apiKey,
-            appSecret: config.apiSecretKey,
-            accessToken: config.accessToken,
-            accessSecret: config.accessTokenSecret
-        });
+    constructor(credentials: TwitterApiTokens) {
+        this.client = new TwitterApi(credentials);
         console.info('Twitter API client initialized');
     }
 
