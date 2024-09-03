@@ -40,17 +40,28 @@ mcp.tool(
         text: z.string({ description: 'The content of your tweet' }).min(1, 'Tweet text cannot be empty').max(280, 'Tweet cannot exceed 280 characters'),
     },
     async (input, context) => {
-        if (!context.sessionId || !twitterClients[context.sessionId]) {
-            throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+        try {
+            if (!context.sessionId || !twitterClients[context.sessionId]) {
+                throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+            }
+            const client = twitterClients[context.sessionId];
+            const tweet = await client.postTweet(input.text);
+            return {
+                content: [{
+                    type: 'text',
+                    text: `Tweet posted successfully!\nURL: https://twitter.com/status/${tweet.id}`
+                }] as TextContent[]
+            };
+        } catch(e: any) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error message: ${e.message}, Error data: ${e.data}`
+                    }
+                ] as TextContent[]
+            };
         }
-        const client = twitterClients[context.sessionId];
-        const tweet = await client.postTweet(input.text);
-        return {
-            content: [{
-                type: 'text',
-                text: `Tweet posted successfully!\nURL: https://twitter.com/status/${tweet.id}`
-            }] as TextContent[]
-        };
     }
 );
 
@@ -62,29 +73,41 @@ mcp.tool(
         count: z.number({ description: 'Number of tweets to retrieve' }).int('Count must be an integer').min(10, 'Minimum count is 10').max(100, 'Maximum count is 100'),
     },
     async (input, context) => {
-        if (!context.sessionId || !twitterClients[context.sessionId]) {
-            throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+        try {
+
+            if (!context.sessionId || !twitterClients[context.sessionId]) {
+                throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+            }
+            const client = twitterClients[context.sessionId];
+            const { tweets, users } = await client.searchTweets(
+                input.query,
+                input.count
+            );
+            
+            const formattedResponse = ResponseFormatter.formatSearchResponse(
+                input.query,
+                tweets,
+                users
+            );
+            
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: ResponseFormatter.toMcpResponse(formattedResponse)
+                    }
+                ] as TextContent[]
+            };
+        } catch(e: any) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error message: ${e.message}, Error data: ${e.data}`
+                    }
+                ] as TextContent[]
+            };
         }
-        const client = twitterClients[context.sessionId];
-        const { tweets, users } = await client.searchTweets(
-            input.query,
-            input.count
-        );
-
-        const formattedResponse = ResponseFormatter.formatSearchResponse(
-            input.query,
-            tweets,
-            users
-        );
-
-        return {
-            content: [
-                {
-                    type: 'text',
-                    text: ResponseFormatter.toMcpResponse(formattedResponse)
-                }
-            ] as TextContent[]
-        };
     }
 )
 
