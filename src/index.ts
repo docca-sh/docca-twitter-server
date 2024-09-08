@@ -37,7 +37,15 @@ mcp.tool(
     'post_tweet',
     'Post a new tweet to Twitter',
     {
-        text: z.string({ description: 'The content of your tweet' }).min(1, 'Tweet text cannot be empty').max(280, 'Tweet cannot exceed 280 characters'),
+        text: z.string({ description: 'The content of your tweet' })
+            .min(1, 'Tweet text cannot be empty')
+            .max(280, 'Tweet cannot exceed 280 characters'),
+        images: z.array(
+            z.string({ description: 'The URL of the image to upload' })
+                .min(1, 'Image URL cannot be empty')
+        )
+            .max(4, 'Cannot have more than 4 images')
+            .optional()
     },
     async (input, context) => {
         try {
@@ -45,14 +53,14 @@ mcp.tool(
                 throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
             }
             const client = twitterClients[context.sessionId];
-            const tweet = await client.postTweet(input.text);
+            const tweet = await client.postTweet(input.text, input.images);
             return {
                 content: [{
                     type: 'text',
                     text: `Tweet posted successfully!\nURL: https://twitter.com/status/${tweet.id}`
                 }] as TextContent[]
             };
-        } catch(e: any) {
+        } catch (e: any) {
             return {
                 content: [
                     {
@@ -83,13 +91,13 @@ mcp.tool(
                 input.query,
                 input.count
             );
-            
+
             const formattedResponse = ResponseFormatter.formatSearchResponse(
                 input.query,
                 tweets,
                 users
             );
-            
+
             return {
                 content: [
                     {
@@ -98,7 +106,7 @@ mcp.tool(
                     }
                 ] as TextContent[]
             };
-        } catch(e: any) {
+        } catch (e: any) {
             return {
                 content: [
                     {

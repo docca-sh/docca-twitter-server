@@ -1,4 +1,4 @@
-import { TwitterApi, TwitterApiTokens } from 'twitter-api-v2';
+import { EUploadMimeType, TwitterApi, TwitterApiTokens } from 'twitter-api-v2';
 import { PostedTweet, Tweet, TwitterError, TwitterUser } from './types.js';
 
 export class TwitterClient {
@@ -10,12 +10,27 @@ export class TwitterClient {
         console.info('Twitter API client initialized');
     }
 
-    async postTweet(text: string): Promise<PostedTweet> {
+    async postTweet(text: string, images?: string[]): Promise<PostedTweet> {
         try {
             const endpoint = 'tweets/create';
             await this.checkRateLimit(endpoint);
-
-            const response = await this.client.v2.tweet(text);
+            const mediaIds: string[] = [];
+            for (const image of images?.slice(0, 4) ?? []) {
+                const mediaType = (image.split('.').pop() ?? 'image/jpeg') as EUploadMimeType;
+                const buffer = await fetch(image);
+                const arrayBuffer = await (await buffer.blob()).arrayBuffer();
+                const mediaId = await this.client.v2.uploadMedia(Buffer.from(arrayBuffer), {
+                    media_category: 'tweet_image',
+                    media_type: mediaType,
+                });
+                mediaIds.push(mediaId);
+            }
+            const response = await this.client.v2.tweet({
+                text,
+                media: {
+                    media_ids: mediaIds.length && mediaIds as any,
+                }
+            });
 
             console.info(`Tweet posted successfully with ID: ${response.data.id}`);
 
