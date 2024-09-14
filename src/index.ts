@@ -54,10 +54,12 @@ mcp.tool(
             }
             const client = twitterClients[context.sessionId];
             const tweet = await client.postTweet(input.text, input.images);
+            const me = await client.getMe();
+
             return {
                 content: [{
                     type: 'text',
-                    text: `Tweet posted successfully!\nURL: https://twitter.com/status/${tweet.id}`
+                    text: `Tweet posted successfully!\nURL: https://twitter.com/${me.username}/status/${tweet.id}`
                 }] as TextContent[]
             };
         } catch (e: any) {

@@ -1,13 +1,28 @@
-import { EUploadMimeType, TwitterApi, TwitterApiTokens } from 'twitter-api-v2';
+import { EUploadMimeType, TwitterApi, TwitterApiTokens, UserV2 } from 'twitter-api-v2';
 import { PostedTweet, Tweet, TwitterError, TwitterUser } from './types.js';
 
 export class TwitterClient {
     private client: TwitterApi;
     private rateLimitMap = new Map<string, number>();
+    private me: UserV2 | undefined;
 
     constructor(credentials: TwitterApiTokens) {
         this.client = new TwitterApi(credentials);
         console.info('Twitter API client initialized');
+    }
+
+    async getMe() {
+        try {
+            if (!this.me) {
+                const endpoint = 'users/me';
+                await this.checkRateLimit(endpoint);
+                const res = await this.client.v2.me();
+                this.me = res.data;
+            }
+            return this.me;
+        } catch (error) {
+            this.handleApiError(error);
+        }
     }
 
     async postTweet(text: string, images?: string[]): Promise<PostedTweet> {
