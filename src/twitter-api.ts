@@ -97,6 +97,18 @@ export class TwitterClient {
             this.handleApiError(error);
         }
     }
+    
+    async likeTweet(tweetId: string) {
+        try {
+            const endpoint = `tweets/${tweetId}/like`;
+            await this.checkRateLimit(endpoint);
+            const me = await this.getMe()
+            const res = await this.client.v2.like(me.id, tweetId);
+            return res;
+        } catch (error) {
+            this.handleApiError(error);
+        }
+    }
 
     private async checkRateLimit(endpoint: string): Promise<void> {
         const lastRequest = this.rateLimitMap.get(endpoint);

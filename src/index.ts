@@ -34,6 +34,31 @@ const mcp = new McpServer({
 });
 
 mcp.tool(
+    'like_tweet',
+    'Like a tweet on Twitter',
+    {
+        tweetId: z.string({ description: 'The ID of the tweet to like' })
+            .min(1, 'Tweet ID cannot be empty')
+    },
+    async (input, context) => {
+        if (!context.sessionId || !twitterClients[context.sessionId]) {
+            throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+        }
+        const client = twitterClients[context.sessionId];
+        const res = await client.likeTweet(input.tweetId);
+        return {
+            content: [res.data.liked ? {
+                type: 'text',
+                text: `Tweet liked successfully!`
+            } : {
+                type: 'text',
+                text: `Failed to like tweet! Error: ${JSON.stringify(res.errors)}`
+            }] as TextContent[]
+        };
+    }
+)
+
+mcp.tool(
     'post_tweet',
     'Post a new tweet to Twitter',
     {
