@@ -42,9 +42,9 @@ export class TwitterClient {
             }
             const response = await this.client.v2.tweet({
                 text,
-                media: {
-                    media_ids: mediaIds.length && mediaIds as any,
-                }
+                media: mediaIds.length ? {
+                    media_ids: mediaIds as any,
+                } : undefined
             });
 
             console.info(`Tweet posted successfully with ID: ${response.data.id}`);
@@ -104,6 +104,18 @@ export class TwitterClient {
             await this.checkRateLimit(endpoint);
             const me = await this.getMe()
             const res = await this.client.v2.like(me.id, tweetId);
+            return res;
+        } catch (error) {
+            this.handleApiError(error);
+        }
+    }
+    
+    async retweet(tweetId: string) {
+        try {
+            const endpoint = `tweets/${tweetId}/retweet`;
+            await this.checkRateLimit(endpoint);
+            const me = await this.getMe()
+            const res = await this.client.v2.retweet(me.id, tweetId);
             return res;
         } catch (error) {
             this.handleApiError(error);

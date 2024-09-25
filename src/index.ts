@@ -34,6 +34,44 @@ const mcp = new McpServer({
 });
 
 mcp.tool(
+    'retweet',
+    'Retweet a tweet on Twitter',
+    {
+        tweetId: z.string({ description: 'The ID of the tweet to retweet' })
+            .min(1, 'Tweet ID cannot be empty')
+    },
+    async (input, context) => {
+        try {
+            if (!context.sessionId || !twitterClients[context.sessionId]) {
+                throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+            }
+            const client = twitterClients[context.sessionId];
+            const res = await client.retweet(input.tweetId);
+            return {
+                content: [
+                    res.data.retweeted ? {
+                        type: 'text',
+                        text: `Tweet retweeted successfully!`
+                    } : {
+                        type: 'text',
+                        text: `Failed to retweet tweet! Error: ${JSON.stringify(res.errors)}`
+                    }
+                ] as TextContent[]
+            };
+        } catch (e: any) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error message: ${e.message}, Error data: ${e.data}`
+                    }
+                ] as TextContent[]
+            };
+        }
+    }
+)
+
+mcp.tool(
     'like_tweet',
     'Like a tweet on Twitter',
     {
@@ -41,20 +79,33 @@ mcp.tool(
             .min(1, 'Tweet ID cannot be empty')
     },
     async (input, context) => {
-        if (!context.sessionId || !twitterClients[context.sessionId]) {
-            throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+        try {
+            if (!context.sessionId || !twitterClients[context.sessionId]) {
+                throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+            }
+            const client = twitterClients[context.sessionId];
+            const res = await client.likeTweet(input.tweetId);
+            return {
+                content: [
+                    res.data.liked ? {
+                        type: 'text',
+                        text: `Tweet liked successfully!`
+                    } : {
+                        type: 'text',
+                        text: `Failed to like tweet! Error: ${JSON.stringify(res.errors)}`
+                    }
+                ] as TextContent[]
+            };
+        } catch (e: any) {
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Error message: ${e.message}, Error data: ${e.data}`
+                    }
+                ] as TextContent[]
+            };
         }
-        const client = twitterClients[context.sessionId];
-        const res = await client.likeTweet(input.tweetId);
-        return {
-            content: [res.data.liked ? {
-                type: 'text',
-                text: `Tweet liked successfully!`
-            } : {
-                type: 'text',
-                text: `Failed to like tweet! Error: ${JSON.stringify(res.errors)}`
-            }] as TextContent[]
-        };
     }
 )
 
