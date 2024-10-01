@@ -35,7 +35,7 @@ const mcp = new McpServer({
 
 mcp.tool(
     'retweet',
-    'Retweet a tweet on Twitter',
+    'Retweet a tweet on Twitter/X',
     {
         tweetId: z.string({ description: 'The ID of the tweet to retweet' })
             .min(1, 'Tweet ID cannot be empty')
@@ -73,7 +73,7 @@ mcp.tool(
 
 mcp.tool(
     'like_tweet',
-    'Like a tweet on Twitter',
+    'Like a tweet on Twitter/X',
     {
         tweetId: z.string({ description: 'The ID of the tweet to like' })
             .min(1, 'Tweet ID cannot be empty')
@@ -111,7 +111,7 @@ mcp.tool(
 
 mcp.tool(
     'post_tweet',
-    'Post a new tweet to Twitter',
+    'Post a new tweet to Twitter/X',
     {
         text: z.string({ description: 'The content of your tweet' })
             .min(1, 'Tweet text cannot be empty')
@@ -153,7 +153,7 @@ mcp.tool(
 
 mcp.tool(
     'search_tweets',
-    'Search for tweets on Twitter',
+    'Search for tweets on Twitter/X',
     {
         query: z.string({ description: 'Search query' }).min(1, 'Search query cannot be empty'),
         count: z.number({ description: 'Number of tweets to retrieve' }).int('Count must be an integer').min(10, 'Minimum count is 10').max(100, 'Maximum count is 100'),
