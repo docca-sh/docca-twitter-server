@@ -7,6 +7,7 @@ import {
     isInitializeRequest,
     TextContent
 } from '@modelcontextprotocol/sdk/types.js';
+import { error } from 'console';
 import { randomUUID } from 'crypto';
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
@@ -209,6 +210,7 @@ const twitterClients: Record<string, TwitterClient> = {};
 
 app.post('/mcp', async (req: Request, res: Response) => {
     console.log('Received MCP request:', req.body);
+    console.log('Received MCP request:', req.headers);
     const { oauth_token, oauth_token_secret } = req.headers;
     try {
         // Check for existing session ID
@@ -227,7 +229,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
                     // This avoids race conditions where requests might come in before the session is stored
                     console.log(`Session initialized with ID: ${sessionId}`);
                     transports[sessionId] = transport;
-                    twitterClients[transport.sessionId!] = new TwitterClient({
+                    twitterClients[sessionId] = new TwitterClient({
                         appKey: env.TWITTER_API_KEY,
                         appSecret: env.TWITTER_API_SECRET,
                         accessToken: oauth_token?.toString(),
