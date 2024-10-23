@@ -209,14 +209,17 @@ const transports: Record<string, StreamableHTTPServerTransport> = {};
 const twitterClients: Record<string, TwitterClient> = {};
 
 app.post('/mcp', async (req: Request, res: Response) => {
-    console.log('Received MCP request:', req.body);
-    console.log('Received MCP request:', req.headers);
     const { oauth_token, oauth_token_secret } = req.headers;
     try {
         // Check for existing session ID
         const sessionId = req.headers['mcp-session-id'] as string | undefined;
         let transport: StreamableHTTPServerTransport;
-
+        console.log('Received mcp request', {
+            body: req.body,
+            headers: req.headers,
+            transportsKeys: Object.keys(transports),
+            sessionId,
+        });
         if (sessionId && transports[sessionId]) {
             // Reuse existing transport
             transport = transports[sessionId];
