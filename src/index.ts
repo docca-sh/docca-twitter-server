@@ -254,6 +254,12 @@ app.post('/mcp', async (req: Request, res: Response) => {
             await transport.handleRequest(req, res, req.body);
             return;
         } else {
+            console.log('Failed request', {
+                body: req.body,
+                headers: req.headers,
+                transportsKeys: Object.keys(transports),
+                sessionId,
+            });
             res.status(400).json({
                 jsonrpc: '2.0',
                 error: {
