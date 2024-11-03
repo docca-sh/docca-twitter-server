@@ -219,6 +219,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
             headers: req.headers,
             transportsKeys: Object.keys(transports),
             sessionId,
+            transport: transports[sessionId!],
         });
         if (sessionId && transports[sessionId]) {
             // Reuse existing transport
