@@ -7,7 +7,6 @@ import {
     isInitializeRequest,
     TextContent
 } from '@modelcontextprotocol/sdk/types.js';
-import { error } from 'console';
 import { randomUUID } from 'crypto';
 import express, { Request, Response } from 'express';
 import { z } from 'zod';
@@ -46,12 +45,19 @@ const createServer = () => {
             tweetId: z.string({ description: 'The ID of the tweet to retweet' })
                 .min(1, 'Tweet ID cannot be empty')
         },
-        async (input, context) => {
+        async (input, extra) => {
             try {
-                if (!context.sessionId || !twitterClients[context.sessionId]) {
-                    throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+                const clientInfo = extra._meta?.client as Record<string, string>;
+                if (!clientInfo?.oauth_token || !clientInfo?.oauth_token_secret) {
+                    throw new Error(`No twitter client for sessionId`);
                 }
-                const client = twitterClients[context.sessionId];
+                const client = new TwitterClient({
+                    appKey: env.TWITTER_API_KEY,
+                    appSecret: env.TWITTER_API_SECRET,
+                    accessToken: clientInfo.oauth_token.toString(),
+                    accessSecret: clientInfo.oauth_token_secret.toString()
+                });
+
                 const res = await client.retweet(input.tweetId);
                 return {
                     content: [
@@ -84,12 +90,18 @@ const createServer = () => {
             tweetId: z.string({ description: 'The ID of the tweet to like' })
                 .min(1, 'Tweet ID cannot be empty')
         },
-        async (input, context) => {
+        async (input, extra) => {
             try {
-                if (!context.sessionId || !twitterClients[context.sessionId]) {
-                    throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+                const clientInfo = extra._meta?.client as Record<string, string>;
+                if (!clientInfo?.oauth_token || !clientInfo?.oauth_token_secret) {
+                    throw new Error(`No twitter client for sessionId`);
                 }
-                const client = twitterClients[context.sessionId];
+                const client = new TwitterClient({
+                    appKey: env.TWITTER_API_KEY,
+                    appSecret: env.TWITTER_API_SECRET,
+                    accessToken: clientInfo.oauth_token.toString(),
+                    accessSecret: clientInfo.oauth_token_secret.toString()
+                });
                 const res = await client.likeTweet(input.tweetId);
                 return {
                     content: [
@@ -129,12 +141,18 @@ const createServer = () => {
                 .max(4, 'Cannot have more than 4 images')
                 .optional()
         },
-        async (input, context) => {
+        async (input, extra) => {
             try {
-                if (!context.sessionId || !twitterClients[context.sessionId]) {
-                    throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+                const clientInfo = extra._meta?.client as Record<string, string>;
+                if (!clientInfo?.oauth_token || !clientInfo?.oauth_token_secret) {
+                    throw new Error(`No twitter client for sessionId`);
                 }
-                const client = twitterClients[context.sessionId];
+                const client = new TwitterClient({
+                    appKey: env.TWITTER_API_KEY,
+                    appSecret: env.TWITTER_API_SECRET,
+                    accessToken: clientInfo.oauth_token.toString(),
+                    accessSecret: clientInfo.oauth_token_secret.toString()
+                });
                 const tweet = await client.postTweet(input.text, input.images);
                 const me = await client.getMe();
 
@@ -164,12 +182,18 @@ const createServer = () => {
             query: z.string({ description: 'Search query' }).min(1, 'Search query cannot be empty'),
             count: z.number({ description: 'Number of tweets to retrieve' }).int('Count must be an integer').min(10, 'Minimum count is 10').max(100, 'Maximum count is 100'),
         },
-        async (input, context) => {
+        async (input, extra) => {
             try {
-                if (!context.sessionId || !twitterClients[context.sessionId]) {
-                    throw new Error(`No twitter client for sessionId: ${context.sessionId}`);
+                const clientInfo = extra._meta?.client as Record<string, string>;
+                if (!clientInfo?.oauth_token || !clientInfo?.oauth_token_secret) {
+                    throw new Error(`No twitter client for sessionId`);
                 }
-                const client = twitterClients[context.sessionId];
+                const client = new TwitterClient({
+                    appKey: env.TWITTER_API_KEY,
+                    appSecret: env.TWITTER_API_SECRET,
+                    accessToken: clientInfo.oauth_token.toString(),
+                    accessSecret: clientInfo.oauth_token_secret.toString()
+                });
                 const { tweets, users } = await client.searchTweets(
                     input.query,
                     input.count
@@ -206,10 +230,8 @@ const createServer = () => {
 }
 
 const transports: Record<string, StreamableHTTPServerTransport> = {};
-const twitterClients: Record<string, TwitterClient> = {};
 
 app.post('/mcp', async (req: Request, res: Response) => {
-    const { oauth_token, oauth_token_secret } = req.headers;
     try {
         // Check for existing session ID
         const sessionId = req.headers['mcp-session-id'] as string | undefined;
@@ -233,12 +255,6 @@ app.post('/mcp', async (req: Request, res: Response) => {
                     // This avoids race conditions where requests might come in before the session is stored
                     console.log(`Session initialized with ID: ${sessionId}`);
                     transports[sessionId] = transport;
-                    twitterClients[sessionId] = new TwitterClient({
-                        appKey: env.TWITTER_API_KEY,
-                        appSecret: env.TWITTER_API_SECRET,
-                        accessToken: oauth_token?.toString(),
-                        accessSecret: oauth_token_secret?.toString()
-                    });
                 }
             });
 
