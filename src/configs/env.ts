@@ -10,6 +10,7 @@ export const env = createEnv({
         PORT: z.coerce.number().default(3000),
         TWITTER_API_KEY: z.string(),
         TWITTER_API_SECRET: z.string(),
+        DATABASE_URL: z.string(),
     },
     runtimeEnv: process.env,
     emptyStringAsUndefined: true,
