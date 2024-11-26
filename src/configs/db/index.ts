@@ -6,8 +6,12 @@ import { env } from '../env.js';
 
 const { Pool } = pg;
 
+if (!env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is required to initialize the database connection.');
+}
+
 const pool = new Pool({
-    connectionString: env.DATABASE_URL
+    connectionString: env.DATABASE_URL,
 });
 
 export const db = drizzle(pool, { schema });
