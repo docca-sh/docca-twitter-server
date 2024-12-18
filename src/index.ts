@@ -53,5 +53,7 @@ app.post('/mcp', async (req: Request, res: Response) => {
 app.delete('/mcp', methodNotAllowed);
 app.get('/mcp', methodNotAllowed);
 
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
 app.listen(env.PORT);
 console.log(`Images MCP Server running on port ${env.PORT}`);
