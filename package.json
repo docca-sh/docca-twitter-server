@@ -44,10 +44,10 @@
     },
     "devDependencies": {
         "@types/express": "^5.0.0",
-        "@types/node": "^20.11.24",
+        "@types/node": "^20.19.32",
         "@types/pg": "^8.11.14",
         "drizzle-kit": "^0.31.0",
-        "typescript": "^5.3.3",
+        "typescript": "^5.9.3",
         "vitest": "^4.0.18"
     }
 }
