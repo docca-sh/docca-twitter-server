@@ -19,7 +19,7 @@ export const createMcp = () => {
         'retweet',
         'Retweet a tweet on Twitter/X',
         {
-            tweetId: z.string({ description: 'The ID of the tweet to retweet' })
+            tweetId: z.string().describe('The ID of the tweet to retweet')
                 .min(1, 'Tweet ID cannot be empty')
         },
         async (input, extra) => {
@@ -64,7 +64,7 @@ export const createMcp = () => {
         'like_tweet',
         'Like a tweet on Twitter/X',
         {
-            tweetId: z.string({ description: 'The ID of the tweet to like' })
+            tweetId: z.string().describe('The ID of the tweet to like')
                 .min(1, 'Tweet ID cannot be empty')
         },
         async (input, extra) => {
@@ -108,11 +108,11 @@ export const createMcp = () => {
         'post_tweet',
         'Post a new tweet to Twitter/X',
         {
-            text: z.string({ description: 'The content of your tweet' })
+            text: z.string().describe('The content of your tweet')
                 .min(1, 'Tweet text cannot be empty')
                 .max(280, 'Tweet cannot exceed 280 characters'),
             images: z.array(
-                z.string({ description: 'The URL of the image to upload' })
+                z.string().describe('The URL of the image to upload')
                     .min(1, 'Image URL cannot be empty')
             )
                 .max(4, 'Cannot have more than 4 images')
@@ -156,8 +156,8 @@ export const createMcp = () => {
         'search_tweets',
         'Search for tweets on Twitter/X',
         {
-            query: z.string({ description: 'Search query' }).min(1, 'Search query cannot be empty'),
-            count: z.number({ description: 'Number of tweets to retrieve' }).int('Count must be an integer').min(10, 'Minimum count is 10').max(100, 'Maximum count is 100'),
+            query: z.string().describe('Search query').min(1, 'Search query cannot be empty'),
+            count: z.number().describe('Number of tweets to retrieve').int('Count must be an integer').min(10, 'Minimum count is 10').max(100, 'Maximum count is 100'),
         },
         async (input, extra) => {
             try {
