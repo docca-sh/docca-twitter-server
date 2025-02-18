@@ -1,7 +1,7 @@
 import { LoggerOptions, pino } from 'pino';
 import { env } from '../env.js';
 
-export const loggerConfigs = {
+const loggerConfigs = {
     development: {
         transport: {
             target: 'pino-pretty',
