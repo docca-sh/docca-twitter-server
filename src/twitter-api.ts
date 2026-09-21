@@ -144,7 +144,7 @@ export class TwitterClient {
 
         // Handle twitter-api-v2 errors
         const apiError = error as any;
-        if (apiError.code) {
+        if (apiError?.code) {
             throw new TwitterError(
                 apiError.message || 'Twitter API error',
                 apiError.code,
