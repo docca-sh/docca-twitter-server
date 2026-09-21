@@ -31,7 +31,7 @@
     "license": "MIT",
     "dependencies": {
         "@modelcontextprotocol/sdk": "^1.26.0",
-        "@t3-oss/env-core": "^0.12.0",
+        "@t3-oss/env-core": "^0.13.11",
         "dotenv": "^16.4.7",
         "drizzle-orm": "^0.43.1",
         "express": "^5.2.1",
